@@ -5,7 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f6efe6" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#15110d" media="(prefers-color-scheme: dark)">
-  <title>Keratin Meme Maker</title>
+  <title>Keratin?! Meme Maker – Make Your Own "May Plus?!" Meme</title>
+  <meta name="description" content="Type a caption and get your own Keratin?! meme from the viral Keratin Plus ad with Maja Salvador. Copy, share, or save it in seconds. Free, no sign-up.">
+  <meta name="keywords" content="keratin meme, keratin plus meme, may plus meme, maja salvador meme, keratin meme generator, filipino meme maker">
+  <meta name="author" content="euphydev">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://keratin-meme-maker.vercel.app/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Keratin?! Meme Maker">
+  <meta property="og:url" content="https://keratin-meme-maker.vercel.app/">
+  <meta property="og:title" content="Keratin?! Meme Maker">
+  <meta property="og:description" content="Type it. She'll say it. Make your own Keratin?! meme and send it to the group chat.">
+  <meta property="og:image" content="https://keratin-meme-maker.vercel.app/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Keratin?! Meme Maker: the meme preview with a caption box and Share, Copy, and Save buttons">
+  <meta property="og:locale" content="en_PH">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Keratin?! Meme Maker">
+  <meta name="twitter:description" content="Type it. She'll say it. Make your own Keratin?! meme and send it to the group chat.">
+  <meta name="twitter:image" content="https://keratin-meme-maker.vercel.app/og-image.jpg">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Keratin?! Meme Maker",
+    "url": "https://keratin-meme-maker.vercel.app/",
+    "description": "Make your own Keratin?! meme from the viral Keratin Plus ad. Type a caption, then copy, share, or save it.",
+    "applicationCategory": "EntertainmentApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "PHP" },
+    "creator": { "@type": "Person", "name": "euphydev", "url": "https://www.facebook.com/euphydev" }
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -224,6 +261,25 @@
       }
       .controls { padding: 8px 12px; }
     }
+    .gh {
+      position: absolute;
+      top: max(16px, env(safe-area-inset-top));
+      right: max(16px, env(safe-area-inset-right));
+      z-index: 5;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .gh:hover { border-color: var(--accent); transform: rotate(-8deg) scale(1.05); }
+    .gh svg { width: 22px; height: 22px; }
     .lore-btn {
       position: fixed;
       right: max(20px, env(safe-area-inset-right));
@@ -455,6 +511,10 @@
   </style>
 </head>
 <body>
+  <a class="gh" href="https://github.com/euphydev/keratin-meme-maker" target="_blank" rel="noopener" aria-label="View source on GitHub" title="View source on GitHub">
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+  </a>
+
   <main>
     <header>
       <span class="pill">Meme maker</span>
