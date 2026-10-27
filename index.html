@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6efe6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#15110d" media="(prefers-color-scheme: dark)">
+  <title>Keratin Meme Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f6efe6;
+      --glow: rgba(214, 150, 74, 0.28);
+      --surface: rgba(255, 255, 255, 0.72);
+      --field: #ffffff;
+      --text: #1d1a17;
+      --muted: #7a7068;
+      --accent: #b8742a;
+      --accent-text: #ffffff;
+      --accent-soft: rgba(184, 116, 42, 0.12);
+      --border: rgba(60, 40, 20, 0.12);
+      --danger: #c2410c;
+      --shadow: 0 1px 2px rgba(40, 25, 10, 0.06), 0 12px 32px rgba(40, 25, 10, 0.10);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #15110d;
+        --glow: rgba(224, 160, 88, 0.16);
+        --surface: rgba(38, 32, 26, 0.72);
+        --field: #1d1814;
+        --text: #f3ece4;
+        --muted: #a89c90;
+        --accent: #e0a058;
+        --accent-text: #1d1408;
+        --accent-soft: rgba(224, 160, 88, 0.14);
+        --border: rgba(255, 235, 210, 0.10);
+        --danger: #fb923c;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.35);
+      }
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background:
+        radial-gradient(120% 60% at 50% -10%, var(--glow), transparent 70%),
+        var(--bg);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding:
+        max(28px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(96px, calc(env(safe-area-inset-bottom) + 80px))
+        max(16px, env(safe-area-inset-left));
+    }
+    header { text-align: center; margin-bottom: 20px; }
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-family: Anton, Impact, sans-serif;
+      font-weight: 400;
+      font-size: clamp(40px, 12vw, 56px);
+      line-height: 1;
+      letter-spacing: 0.01em;
+      margin: 10px 0 6px;
+    }
+    .sub { color: var(--muted); margin: 0; font-size: 15px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      background: #000;
+    }
+    .controls { padding: 16px 4px 4px; }
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .field-row label { font-weight: 600; }
+    .count { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+    .count.full { color: var(--danger); font-weight: 600; }
+    .input-wrap { position: relative; }
+    #text {
+      width: 100%;
+      height: 54px;
+      padding: 0 48px 0 16px;
+      font: inherit;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--text);
+      background: var(--field);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    #text::placeholder { color: var(--muted); opacity: 0.6; }
+    #text:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+    .clear {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .clear:hover { background: var(--accent-soft); }
+    .clear[hidden] { display: none; }
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+      min-height: 44px;
+      font-size: 15px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle code {
+      font-family: Anton, Impact, sans-serif;
+      font-size: 16px;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .toggle input { position: absolute; opacity: 0; pointer-events: none; }
+    .switch {
+      flex: none;
+      position: relative;
+      width: 46px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--border);
+      transition: background 0.2s;
+    }
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .switch { background: var(--accent); }
+    .toggle input:checked + .switch::after { transform: translateX(18px); }
+    .toggle input:focus-visible + .switch { box-shadow: 0 0 0 4px var(--accent-soft); }
+    .actions { display: flex; gap: 10px; margin-top: 16px; }
+    .actions button {
+      flex: 1;
+      height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font: inherit;
+      font-weight: 600;
+      font-size: 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 0.1s, filter 0.15s;
+    }
+    .actions button[hidden] { display: none; }
+    .actions button:active { transform: scale(0.97); }
+    .primary { background: var(--accent); color: var(--accent-text); border: 0; }
+    .primary:hover { filter: brightness(1.05); }
+    .secondary { background: var(--field); color: var(--text); border: 1.5px solid var(--border); }
+    .secondary:hover { border-color: var(--accent); }
+    .actions svg { width: 20px; height: 20px; flex: none; }
+    @media (min-width: 860px) {
+      main { padding-left: 32px; padding-right: 32px; }
+      header { margin-bottom: 28px; }
+      .card {
+        display: grid;
+        grid-template-columns: minmax(0, 1.75fr) minmax(300px, 1fr);
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 28px;
+      }
+      .controls { padding: 8px 12px; }
+    }
+    .lore-btn {
+      position: fixed;
+      right: max(20px, env(safe-area-inset-right));
+      bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px));
+      z-index: 10;
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--accent-text);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      animation: bob 3s ease-in-out infinite;
+    }
+    .lore-btn svg { width: 24px; height: 24px; }
+    .lore-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      animation: ping 3s ease-out infinite;
+    }
+    .lore-btn:hover { animation-play-state: paused; filter: brightness(1.05); }
+    .lore-btn:hover svg { animation: wiggle 0.5s ease-in-out; }
+    .lore-btn:active { transform: scale(0.94); }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    @keyframes ping {
+      0% { transform: scale(1); opacity: 0.6; }
+      70%, 100% { transform: scale(1.6); opacity: 0; }
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0); }
+      25% { transform: rotate(-12deg); }
+      75% { transform: rotate(12deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lore-btn, .lore-btn::before, .lore-btn:hover svg { animation: none; }
+      .lore-btn::before { display: none; }
+    }
+    .lore {
+      width: min(480px, calc(100% - 32px));
+      max-height: calc(100dvh - 48px);
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--bg);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      overflow: auto;
+    }
+    .lore::backdrop {
+      background: rgba(0, 0, 0, 0.45);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    .lore[open] { animation: rise 0.22s ease-out; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: none; }
+    }
+    @media (max-width: 600px) {
+      .lore {
+        width: 100%;
+        max-width: none;
+        margin: auto 0 0;
+        border-radius: 24px 24px 0 0;
+        border-bottom: 0;
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
+      }
+    }
+    .lore-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .lore-close {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .dock {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px));
+      z-index: 9;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .more-apps {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      height: 52px;
+      padding: 6px 14px 6px 6px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      color: inherit;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .more-apps:hover { background: var(--accent-soft); }
+    .more-apps { animation: nudge 4s ease-in-out 2s infinite; }
+    .more-apps:hover, .more-apps:focus-visible { animation: none; }
+    @keyframes nudge {
+      0%, 12%, 100% { transform: translateX(0) rotate(0); }
+      2% { transform: translateX(-3px) rotate(-1deg); }
+      4% { transform: translateX(3px) rotate(1deg); }
+      6% { transform: translateX(-2px) rotate(-0.5deg); }
+      8% { transform: translateX(2px) rotate(0.5deg); }
+      10% { transform: translateX(-1px) rotate(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .more-apps { animation: none; }
+    }
+    @media (max-width: 600px) {
+      .dock { justify-content: flex-start; padding: 0 84px 0 max(16px, env(safe-area-inset-left)); }
+      .more-apps { max-width: 100%; min-width: 0; }
+      .more-text { overflow: hidden; text-overflow: ellipsis; }
+    }
+    @media (max-width: 380px) {
+      .more-text .long { display: none; }
+      .more-text b { text-transform: capitalize; }
+    }
+    .more-icon {
+      flex: none;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .more-icon svg { width: 20px; height: 20px; }
+    .more-text { white-space: nowrap; }
+    .more-text b { font-size: 15px; font-weight: 600; }
+    .more-arrow { flex: none; width: 20px; height: 20px; color: var(--muted); transition: transform 0.15s, color 0.15s; }
+    .more-apps:hover .more-arrow { transform: translateX(4px); color: var(--accent); }
+    .about h2 { font-size: 17px; font-weight: 600; margin: 0; }
+    .about h2:focus { outline: none; }
+    .lore-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .about p { margin: 0; font-size: 15px; line-height: 1.6; }
+    .watch {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      padding: 8px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: inherit;
+      text-decoration: none;
+      transition: border-color 0.15s;
+    }
+    .watch:hover { border-color: var(--accent); }
+    .watch .thumb {
+      flex: none;
+      width: 96px;
+      aspect-ratio: 16 / 9;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+    .watch .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .watch .meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .watch .meta b { font-size: 15px; font-weight: 600; }
+    .watch .meta span { font-size: 13px; color: var(--muted); }
+    .credits { margin-top: 20px; color: var(--muted); }
+    .credits p { font-size: 13px; line-height: 1.6; }
+    .credits p + p { margin-top: 8px; }
+    .credits a { color: inherit; text-underline-offset: 2px; }
+    footer { display: flex; justify-content: center; margin-top: 32px; }
+    .made-by {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 12px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .made-by:hover { background: var(--accent-soft); }
+    .made-by .wordmark { display: block; height: 44px; width: auto; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(88px, calc(env(safe-area-inset-bottom) + 76px));
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 380px) {
+      .actions { flex-wrap: wrap; }
+      .actions .primary { flex-basis: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <span class="pill">Meme maker</span>
+      <h1>KERATIN?!</h1>
+      <p class="sub">Type it. She'll say it.</p>
+    </header>
+
+    <section class="card">
+      <canvas id="canvas" aria-label="Meme preview"></canvas>
+
+      <div class="controls">
+        <div class="field-row">
+          <label for="text">Caption</label>
+          <span class="count" id="count"></span>
+        </div>
+        <div class="input-wrap">
+          <input id="text" type="text" placeholder="May plus" autocomplete="off"
+                 autocapitalize="characters" spellcheck="false" enterkeyhint="done">
+          <button class="clear" id="clear" type="button" aria-label="Clear caption">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <label class="toggle">
+          <span>Add <code>?!</code> automatically</span>
+          <input id="auto" type="checkbox" checked>
+          <span class="switch" aria-hidden="true"></span>
+        </label>
+
+        <div class="actions">
+          <button class="primary" id="share" type="button" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg>
+            Share
+          </button>
+          <button class="primary" id="copy" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+          <button class="secondary" id="download" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Save
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <footer>
+      <a class="made-by" href="https://www.facebook.com/euphydev" target="_blank" rel="noopener">
+        <span class="label">Made by</span>
+        <picture>
+          <source srcset="assets/secondary-light.svg" media="(prefers-color-scheme: dark)">
+          <img class="wordmark" src="assets/secondary-default.svg" alt="euphydev">
+        </picture>
+      </a>
+    </footer>
+  </main>
+
+  <nav class="dock" aria-label="More from euphydev">
+    <a class="more-apps" href="https://www.stackinfolio.dev/euphydev" target="_blank" rel="noopener">
+      <span class="more-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </span>
+      <span class="more-text">
+        <b><span class="long">Check out </span>my other apps</b>
+      </span>
+      <svg class="more-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </nav>
+
+  <button class="lore-btn" id="lore-open" type="button" aria-label="About the meme" title="About the meme">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+  </button>
+
+  <dialog class="lore about" id="lore" aria-labelledby="about-title">
+      <div class="lore-head">
+        <h2 id="about-title" tabindex="-1" autofocus>About the meme</h2>
+        <button class="lore-close" id="lore-close" type="button" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <p>It comes from a 2024 Keratin Plus ad starring <strong>Maja Salvador</strong>, a Filipino
+        actress and TV host. Her drawn-out "Keratin???" and the line "may plus?!" caught on
+        online and became a go-to reaction meme.</p>
+      <a class="watch" href="https://www.youtube.com/watch?v=sPNOlcsXJE8" target="_blank" rel="noopener">
+        <span class="thumb"><img src="https://i.ytimg.com/vi/sPNOlcsXJE8/mqdefault.jpg" alt="" loading="lazy"></span>
+        <span class="meta">
+          <b>Watch the original ad</b>
+          <span>KERATINplus on YouTube</span>
+        </span>
+      </a>
+
+      <div class="credits">
+        <p>Unofficial fan-made parody, not affiliated with or endorsed by Maja Salvador or
+          Keratin Plus. The image is a frame from the
+          <a href="https://www.youtube.com/watch?v=sPNOlcsXJE8" target="_blank" rel="noopener">official ad</a>;
+          all rights belong to their respective owners. Please use it for fun, not to bash anyone
+          or pass it off as a real ad. If you own the rights and want it taken down, reach out.</p>
+        <p>Sources:
+          <a href="https://www.youtube.com/watch?v=sPNOlcsXJE8" target="_blank" rel="noopener">KERATINplus</a>,
+          <a href="https://journalnews.com.ph/the-genius-of-maja-salvadors-new-ad" target="_blank" rel="noopener">People's Tonight</a>,
+          <a href="https://interaksyon.philstar.com/trends-spotlights/2024/05/16/275653/edit-video-print-ads-maja-salvador-netizens/" target="_blank" rel="noopener">Interaksyon</a>,
+          <a href="https://en.wikipedia.org/wiki/Maja_Salvador" target="_blank" rel="noopener">Wikipedia</a></p>
+      </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="template.js"></script>
+  <script>
+    const MAX_CHARS = 24;
+    const SUFFIX = "?!";
+    const SCALE = 2;
+    const STRETCH = 1.2;
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const input = document.getElementById("text");
+    const auto = document.getElementById("auto");
+    const count = document.getElementById("count");
+    const toast = document.getElementById("toast");
+
+    const img = new Image();
+    let crop = { top: 0, height: 0 };
+
+    function findCrop(image) {
+      const c = document.createElement("canvas");
+      c.width = image.width;
+      c.height = image.height;
+      const cx = c.getContext("2d");
+      cx.drawImage(image, 0, 0);
+      const data = cx.getImageData(0, 0, c.width, c.height).data;
+      const isDark = (y) => {
+        let sum = 0;
+        for (let x = 0; x < c.width; x++) {
+          const i = (y * c.width + x) * 4;
+          sum += data[i] + data[i + 1] + data[i + 2];
+        }
+        return sum / (c.width * 3) < 20;
+      };
+      let top = 0;
+      while (top < c.height / 3 && isDark(top)) top++;
+      let bottom = c.height - 1;
+      while (bottom > (c.height * 2) / 3 && isDark(bottom)) bottom--;
+      return { top, height: bottom - top + 1 };
+    }
+
+    function baseText(raw) {
+      const text = raw.trim();
+      return auto.checked ? text.replace(/[?!\s]+$/, "") : text;
+    }
+
+    function caption(raw) {
+      const base = baseText(raw).toUpperCase();
+      return base && auto.checked ? base + SUFFIX : base;
+    }
+
+    function limit() {
+      return auto.checked ? MAX_CHARS : MAX_CHARS + SUFFIX.length;
+    }
+
+    function wrapLines(text, maxWidth) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = "";
+      for (const word of words) {
+        const test = line ? line + " " + word : word;
+        if (ctx.measureText(test).width <= maxWidth || !line) {
+          line = test;
+        } else {
+          lines.push(line);
+          line = word;
+        }
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function clampInput() {
+      if (baseText(input.value).length > limit()) {
+        input.value = input.value.trimStart().slice(0, limit());
+      }
+    }
+
+    function render() {
+      clampInput();
+      const w = img.width * SCALE;
+      const h = crop.height * SCALE;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, crop.top, img.width, crop.height, 0, 0, w, h);
+
+      const text = caption(input.value);
+      const len = baseText(input.value).length;
+      count.textContent = `${len}/${limit()}`;
+      count.classList.toggle("full", len >= limit());
+      clearBtn.hidden = !input.value;
+      if (!text) return;
+
+      const maxWidth = (w * 0.92) / STRETCH;
+      let size = h * 0.15;
+      let lines;
+      do {
+        ctx.font = `${size}px Impact, Haettenschweiler, "Arial Narrow Bold", Anton, sans-serif`;
+        lines = wrapLines(text, maxWidth);
+        size -= 2;
+      } while (
+        size > 12 &&
+        (lines.length > 2 || lines.some((l) => ctx.measureText(l).width > maxWidth))
+      );
+      size += 2;
+
+      const lineHeight = size * 1.08;
+      const bottomPad = h * 0.035;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = size * 0.06;
+      ctx.strokeStyle = "#111";
+      ctx.fillStyle = "#fff";
+
+      lines.forEach((line, i) => {
+        const y = h - bottomPad - (lines.length - 1 - i) * lineHeight;
+        ctx.save();
+        ctx.translate(w / 2, y);
+        ctx.scale(STRETCH, 1);
+        ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+        ctx.shadowOffsetX = size * 0.03;
+        ctx.shadowOffsetY = size * 0.04;
+        ctx.shadowBlur = size * 0.03;
+        ctx.strokeText(line, 0, 0);
+        ctx.shadowColor = "transparent";
+        ctx.fillText(line, 0, 0);
+        ctx.restore();
+      });
+    }
+
+    function fileName() {
+      const slug = caption(input.value).replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
+      return `keratin-${slug || "meme"}.png`;
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast.t);
+      showToast.t = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function toBlob() {
+      return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    }
+
+    document.getElementById("download").addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.download = fileName();
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+    });
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      try {
+        // safari wants the promise, not the awaited blob
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": toBlob() })]);
+        showToast("Copied! Paste it anywhere.");
+      } catch {
+        showToast("Copy isn't supported here. Use Save.");
+      }
+    });
+
+    const shareBtn = document.getElementById("share");
+    const copyBtn = document.getElementById("copy");
+    const probe = new File([""], "probe.png", { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [probe] })) {
+      shareBtn.hidden = false;
+      copyBtn.className = "secondary";
+    }
+    shareBtn.addEventListener("click", async () => {
+      try {
+        const file = new File([await toBlob()], fileName(), { type: "image/png" });
+        await navigator.share({ files: [file] });
+      } catch (err) {
+        if (err.name !== "AbortError") showToast("Couldn't share. Use Save.");
+      }
+    });
+
+    const clearBtn = document.getElementById("clear");
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      render();
+      input.focus();
+    });
+
+    const lore = document.getElementById("lore");
+    document.getElementById("lore-open").addEventListener("click", () => lore.showModal());
+    document.getElementById("lore-close").addEventListener("click", () => lore.close());
+    lore.addEventListener("click", (e) => {
+      const r = lore.getBoundingClientRect();
+      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside) lore.close();
+    });
+
+    input.addEventListener("input", render);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") input.blur();
+    });
+    auto.addEventListener("change", render);
+    input.maxLength = MAX_CHARS + SUFFIX.length;
+
+    img.onload = async () => {
+      crop = findCrop(img);
+      try { await document.fonts.load("40px Anton"); } catch {}
+      render();
+    };
+    img.src = TEMPLATE_SRC;
+    const prefill = new URLSearchParams(location.search).get("t");
+    input.value = (prefill ?? "May plus").slice(0, MAX_CHARS + SUFFIX.length);
+  </script>
+</body>
+</html>
